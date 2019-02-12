@@ -1,3 +1,17 @@
+/*
+  Check youtube channel for Sources:
+  youtube.com/c/MahmoudIbrahimchannel
+  Library originally added 12 Feb 2019
+  by Mahmoud Ibrahim & Ahmed Saleh
+*/
+
+// include the library code:
+#include <LiquidCrystal.h>
+// initialize the library by associating any needed LCD interface pin
+// with the arduino pin number it is connected to
+const int rs = 12, en = 11, d2 = 7, d3 = 6, d4 = 5, d5 = 4;
+LiquidCrystal lcd(rs, en, d2, d3, d4, d5);
+
 const byte voltageAnalogPin = A0;
 const byte sensorTA12 = A1;
 const byte interruptPinCurrent = 2;
@@ -12,6 +26,8 @@ float Irms = 0;
 
 void setup() {
   Serial.begin(115200);
+  lcd.begin(16, 2);
+
   VoltTime = millis();
   pinMode(interruptPinCurrent, INPUT_PULLUP);
   pinMode(interruptPinVolt, INPUT_PULLUP);
@@ -23,9 +39,30 @@ void loop() {
   getACVoltageCurrent();
   //printSerial();
   // 0 to plot Vrms value - 1 to plot Irms - 2 to plot powerFactor - 3 to plot totalPower
-  plotValues(1);
+  //plotValues(1);
+  printlcd();
 
 }
+
+void printlcd() {
+  lcd.setCursor(0, 0);
+  lcd.print("VRMS=");
+  lcd.setCursor(5, 0);
+  lcd.print((int)Vrms);
+  lcd.setCursor(9,0);
+  lcd.print("I=");
+  lcd.print(Irms/1000.0);
+  lcd.setCursor(0,1);
+  lcd.print("PF=");
+  lcd.setCursor(4,1);
+  lcd.print(powerFactor,2);
+  float totalPower = Vrms * Irms * 1E-3 * abs(powerFactor);
+  lcd.setCursor(9,1);
+  lcd.print("Pw=");
+  lcd.print(totalPower);
+  delay(500);
+}
+
 void printSerial() {
   Serial.print("V RMS Voltage Value: ");
   Serial.print(Vrms);
@@ -104,7 +141,7 @@ void getACVoltageCurrent() {
 
   // Convert the digital data to a voltage
   Irms = (VmaxValue * 5.0) / 1023.0;
-  if (Irms < .05) { // Compensate for Sensor offset
+  if (Irms < .06) { // Compensate for Sensor offset
     Irms = 0;
   }
 
