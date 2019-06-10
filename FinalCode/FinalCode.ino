@@ -27,7 +27,7 @@ float Irms = 0;
 void setup() {
   Serial.begin(115200);
   lcd.begin(16, 2);
-
+  lcd.clear();
   VoltTime = millis();
   pinMode(interruptPinCurrent, INPUT_PULLUP);
   pinMode(interruptPinVolt, INPUT_PULLUP);
@@ -39,8 +39,8 @@ void loop() {
   getACVoltageCurrent();
   //printSerial();
   // 0 to plot Vrms value - 1 to plot Irms - 2 to plot powerFactor - 3 to plot totalPower
-  //plotValues(1);
-  printlcd();
+  plotValues(3);
+  //printlcd();
 
 }
 
@@ -95,7 +95,7 @@ void plotValues(int type) {
       delay(10);
 
       break;
-      delay(100);
+      //delay(100);
   }
 }
 void detectRisingEdgeCurrent() {
@@ -104,11 +104,12 @@ void detectRisingEdgeCurrent() {
 }
 void detectRisingEdgeVolt() {
   VoltTime = millis();
+  // first check for ac loads
   if (currentFlag) {
     currentFlag = false;
     powerFactor = cos(2 * (22 / 7.0) * pfTime * 1E-3 * frequency);
   } else {
-    powerFactor = 0;
+    powerFactor = 1;
   }
   //Serial.println(powerFactor);
 }
@@ -141,7 +142,7 @@ void getACVoltageCurrent() {
 
   // Convert the digital data to a voltage
   Irms = (VmaxValue * 5.0) / 1023.0;
-  if (Irms < .06) { // Compensate for Sensor offset
+  if (Irms < .055 ) { // Compensate for Sensor offset
     Irms = 0;
   }
 
